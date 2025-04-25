@@ -3,93 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <title>Cadastro de Cliente</title>
-  <link rel="stylesheet" href="style.css"> <!-- CSS externo para estilização -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>Cadastro de Cliente</h1>
-
-    <!-- Formulário para cadastrar um novo cliente -->
-    <form id="form-cadastro" action="/clientes" method="POST">
-      
-      <!-- Campo para digitar o nome -->
+    <form id="form-cadastro" action="/clientes" method="POST">  
       <label for="nome">Nome:</label>
       <input type="text" id="nome" name="nome" required>
-
-      <!-- Campo para digitar o email -->
       <label for="email">Email:</label>
       <input type="email" name="email" id="email" required
         pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.(com|com\.br|net|org)"
         title="Digite um email válido, ex: exemplo@gmail.com">
-
-      <!-- Campo para digitar o telefone -->
       <label for="telefone">Telefone:</label>
       <input type="tel" name="telefone" id="telefone" required
         pattern="(\+55\s?)?(51|55)\s?9\d{4}[-\s]?\d{4}"
-        title="Digite um telefone válido: +55 51 9XXXX-XXXX">
-      
-      <!-- Botão de envio -->
+        title="Digite um telefone válido: +55 51 9XXXX-XXXX">   
       <button type="submit">Cadastrar</button>
     </form>
   </div>
-
   <script>
-    // ============================
-    // EVENTO DE ENVIO DO FORMULÁRIO
-    // ============================
     const form = document.getElementById("form-cadastro");
-
     form.addEventListener("submit", async function (e) {
-      e.preventDefault(); // Impede o envio normal da página
-
-      // Coleta e remove espaços extras dos valores
+      e.preventDefault(); 
       const nome = document.getElementById("nome").value.trim();
       const email = document.getElementById("email").value.trim();
       const telefone = document.getElementById("telefone").value.trim();
-
-      // Regex para validar email
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|com\.br|net|org|gov|edu)$/i;
-      // Regex para validar telefone (somente 51 ou 55, com 9 na frente)
       const telefoneRegex = /^(51|55)9\d{8}$/;
-
-      // Valida email
       if (!emailRegex.test(email)) {
         alert("Email inválido! Ex: exemplo@gmail.com");
         return;
       }
-
-      // Valida telefone
       if (!telefoneRegex.test(telefone)) {
         alert("Telefone inválido! Use 51 ou 55 + 9 + 8 dígitos (ex: 51912345678)");
         return;
       }
-
-      // Envia os dados para o backend via fetch
-      const response = await fetch("http://localhost:3000/clientes", {
+      const response = await fetch("https://back-prisma-api.onrender.com/clientes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, email, telefone }),
+        body: JSON.stringify({ nome, email, telefone, status: "ativo" }),
       });
-
-      // Captura a resposta do servidor (sucesso ou erro)
       const resultado = await response.text();
-
-      // Mostra a mensagem retornada pelo servidor
       if (response.ok) {
-        alert(resultado); // Sucesso (cliente cadastrado)
-        form.reset();     // Limpa os campos
+        alert(resultado); 
+        form.reset(); 
       } else {
-        alert(resultado); // Erro (duplicado, etc.)
+        alert(resultado); 
       }
     });
-
-    // ============================
-    // LIMITA O CAMPO DE TELEFONE A 11 DÍGITOS
-    // ============================
     document.getElementById("telefone").addEventListener("input", function () {
       this.value = this.value.replace(/[^\d]/g, "").slice(0, 11);
     });
   </script>
-
 </body>
 </html>
