@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Clientes</title>
+  <link rel="stylesheet" href="style.css"> <!-- Estilo visual da página -->
+</head>
+<body>
+  <div class="container">
+    <h1>Clientes Cadastrados</h1>
+
+    <!-- Campo de busca por nome -->
+    <input type="text" id="busca" placeholder="Buscar por nome...">
+    <button onclick="buscarClientes()">Buscar</button>
+    <button onclick="carregarClientes()">Limpar</button>
+
+    <!-- Tabela onde os clientes serão listados -->
+    <table id="tabela-clientes">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Telefone</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>       
+      </thead>
+      <tbody></tbody> <!-- Corpo da tabela será preenchido dinamicamente -->
+    </table>
+
+    <!-- Link para voltar ao formulário de cadastro -->
+    <a href="index.html" class="voltar">← Voltar ao Cadastro</a>
+  </div>
+
+  <script>
+    // ===================================
+    // FUNÇÃO PRINCIPAL: Carrega todos os clientes
+    // ===================================
+    function carregarClientes() {
+      buscarOuCarregarClientes('http://localhost:3000/clientes');
+    }
+
+    // ===================================
+    // FUNÇÃO DE BUSCA POR NOME
+    // ===================================
+    function buscarClientes() {
+      const termo = document.getElementById('busca').value.trim();
+      if (!termo) return alert("Digite um nome para buscar");
+      buscarOuCarregarClientes(`http://localhost:3000/clientes/buscar/${termo}`);
+    }
+
+    // ===================================
+    // FUNÇÃO GENÉRICA: busca ou carrega dados da API
+    // ===================================
+    function buscarOuCarregarClientes(endpoint) {
+      fetch(endpoint)
+        .then(res => res.json())
+        .then(dados => {
+          const corpo = document.querySelector('#tabela-clientes tbody');
+          corpo.innerHTML = ''; // Limpa a tabela antes de inserir os novos dados
+
+          dados.forEach(cliente => {
+            const linha = document.createElement('tr');
+            linha.innerHTML = `
+              <td>${cliente.nome}</td>
+              <td>${cliente.email}</td>
+              <td>${cliente.telefone}</td>
+              <td><span class="badge ${cliente.status}">${cliente.status}</span></td>
+              <td>
+                <button onclick="excluirCliente(${cliente.id})">🗑️</button>
+                <button onclick="alternarStatus(${cliente.id}, '${cliente.status}')">🔁</button>
+                <a href="editar.html?id=${cliente.id}"><button>✏️</button></a>
+              </td>
+            `;
+            corpo.appendChild(linha);
+          });
+        })
+        .catch(err => {
+          console.error('Erro ao carregar clientes:', err);
+        });
+    }
+
+    // ===================================
+    // FUNÇÃO PARA TROCAR O STATUS (ativo/inativo)
+    // ===================================
+    function alternarStatus(id, statusAtual) {
+      const novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
+
+      fetch(`http://localhost:3000/clientes/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: novoStatus })
+      })
+      .then(res => {
+        if (res.ok) {
+          showToast(`Status alterado para ${novoStatus}`, "sucesso");
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showToast("Erro ao atualizar status", "erro");
+        }
+      });
+    }
+
+    // ===================================
+    // FUNÇÃO PARA EXCLUIR UM CLIENTE
+    // ===================================
+    function excluirCliente(id) {
+      if (confirm("Deseja realmente excluir este cliente?")) {
+        fetch(`http://localhost:3000/clientes/${id}`, { method: 'DELETE' })
+          .then(res => {
+            if (res.ok) {
+              showToast("Cliente excluído com sucesso!", "sucesso");
+              location.reload();
+            } else {
+              showToast("Erro ao excluir cliente.", "erro");
+            }
+          });
+      }
+    }
+
+    // ===================================
+    // EXIBE UMA MENSAGEM TEMPORÁRIA (TOAST)
+    // ===================================
+    function showToast(mensagem, tipo) {
+      const toast = document.createElement("div");
+      toast.className = `toast ${tipo}`; // toast sucesso ou erro
+      toast.innerText = mensagem;
+      document.body.appendChild(toast);
+
+      // Remove o toast após 3 segundos
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ============================
+    // EXECUTA AO ABRIR A PÁGINA
+    // ============================
+    carregarClientes(); // Carrega todos os clientes inicialmente
+
+  </script>
+</body>
+</html>
+
+
