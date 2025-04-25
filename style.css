@@ -220,16 +220,27 @@ td, th {
 }
 
 .toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: bold;
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #28a745;
   color: white;
-  z-index: 9999;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s ease;
+  text-align: center;
+  border-radius: 10px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  font-size: 17px;
+  box-shadow: 0 0 10px #333;
+  transition: all 0.5s ease;
+}
+
+.toast.show {
+  visibility: visible;
+  bottom: 50px;
+  opacity: 1;
 }
 
 .toast.sucesso {
